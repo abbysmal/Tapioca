@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: b74ddfe4cb7d14bb5f3fbb4f17876ea2) *)
+(* DO NOT EDIT (digest: d67b178994f8fffaa5a22b4c4cdaf905) *)
 module OASISGettext = struct
 (* # 22 "src/oasis/OASISGettext.ml" *)
 
@@ -597,28 +597,14 @@ let package_default =
   {
      MyOCamlbuildBase.lib_ocaml = [("editor", ["src"], [])];
      lib_c = [];
-     flags =
-       [
-          (["oasis_library_editor_byte"; "ocaml"; "link"; "byte"],
-            [(OASISExpr.EBool true, S [A "-w"; A "A"])]);
-          (["oasis_library_editor_native"; "ocaml"; "link"; "native"],
-            [(OASISExpr.EBool true, S [A "-w"; A "A"])]);
-          (["oasis_library_editor_byte"; "ocaml"; "ocamldep"; "byte"],
-            [(OASISExpr.EBool true, S [A "-w"; A "A"])]);
-          (["oasis_library_editor_native"; "ocaml"; "ocamldep"; "native"],
-            [(OASISExpr.EBool true, S [A "-w"; A "A"])]);
-          (["oasis_library_editor_byte"; "ocaml"; "compile"; "byte"],
-            [(OASISExpr.EBool true, S [A "-w"; A "A"])]);
-          (["oasis_library_editor_native"; "ocaml"; "compile"; "native"],
-            [(OASISExpr.EBool true, S [A "-w"; A "A"])])
-       ];
+     flags = [];
      includes = []
   }
   ;;
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 622 "myocamlbuild.ml"
+# 608 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
  module M = Ocamlbuild_eliom.Make(struct
@@ -635,7 +621,7 @@ let () =
         match hook with
           | After_options ->
               let f = function
-                | "src/client/editor.byte" -> "src/client/editor.js"
+                | "src/client/tapioca.byte" -> "src/client/tapioca.js"
                 | x -> x
               in
               Options.targets := List.map f !Options.targets

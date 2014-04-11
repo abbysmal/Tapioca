@@ -1,5 +1,5 @@
 OASISFormat: 0.4
-Name: cumulus
+Name: tapioca
 Version: 1.0
 Synopsis: Tapioca: A simple collaborative text editor experiment in OCaml
 Authors:
@@ -11,7 +11,7 @@ BuildTools: ocamlbuild
 XOCamlbuildPluginTags: package(eliom.ocamlbuild)
 OCamlVersion: >= 4.01
 
-Library editor
+Library tapioca
   Path: src/
   Modules:
     Services,
@@ -25,7 +25,7 @@ Library editor
 
 
 
-Executable editor
+Executable tapioca
   Install: false
   Path: src/client
   MainIs: editor.ml
