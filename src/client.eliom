@@ -8,11 +8,11 @@ let save_data data =
   >>= fun value ->
   begin
     match data with
-    | Ot.DeleteChar -> Ocsipersist.set v @@ Str.string_before value (String.length value -1)
-    | Ot.WriteChar str -> Eliom_lib.debug "%s" value; Ocsipersist.set v @@ value ^ str
+    | Edition.DeleteChar -> Ocsipersist.set v @@ Str.string_before value (String.length value -1)
+    | Edition.WriteChar str -> Eliom_lib.debug "%s" value; Ocsipersist.set v @@ value ^ str
   end
 
-let save = server_function Json.t<Ot.op> save_data
+let save = server_function Json.t<Edition.operation> save_data
 
 {client{
 
@@ -43,9 +43,9 @@ let load_document editor =
     | `NotConnected -> Lwt.return_unit
   end
 
-let add_backslash _ = %save (Ot.WriteChar("</br></br>"))
-let add character = %save (Ot.WriteChar(Js.to_string character))
-let delete_one_char _ = %save (Ot.DeleteChar)
+let add_backslash _ = %save (Edition.WriteChar("</br></br>"))
+let add character = %save (Edition.WriteChar(Js.to_string character))
+let delete_one_char _ = %save (Edition.DeleteChar)
 
 let onload _ =
   let d = Html.document in
