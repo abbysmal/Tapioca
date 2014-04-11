@@ -1,0 +1,23 @@
+# OASIS_START
+# DO NOT EDIT (digest: 01c086a1aa3b3705bb19e357fa1e9672)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library tapioca
+"src/tapioca.cmxs": use_tapioca
+<src/*.ml{,i}>: package(eliom.server)
+<src/*.ml{,i}>: package(lwt)
+# Executable tapioca
+"src/client/editor.byte": package(eliom.client)
+<src/client/*.ml{,i}>: package(eliom.client)
+# OASIS_STOP
