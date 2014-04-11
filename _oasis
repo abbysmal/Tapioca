@@ -14,12 +14,15 @@ OCamlVersion: >= 4.01
 Library tapioca
   Path: src/
   Modules:
+    server/Client,
     Services,
-    Ot,
+    Edition,
     Main
   BuildDepends:
     eliom.server (>= 3.0.3),
-    lwt (>= 2.4)
+    lwt (>= 2.4),
+    deriving,
+    js_of_ocaml.deriving.syntax
 #  ByteOpt: -w A
 #  NativeOpt: -w A
 
@@ -28,7 +31,7 @@ Library tapioca
 Executable tapioca
   Install: false
   Path: src/client
-  MainIs: editor.ml
+  MainIs: tapioca.ml
   BuildDepends:
     eliom.client
   CompiledObject: byte
