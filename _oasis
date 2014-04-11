@@ -1,0 +1,36 @@
+OASISFormat: 0.4
+Name: cumulus
+Version: 1.0
+Synopsis: Tapioca: A simple collaborative text editor experiment in OCaml
+Authors:
+  Enguerrand Decorne
+License: MIT
+AlphaFeatures: ocamlbuild_more_args, compiled_setup_ml
+Plugins: DevFiles (0.3), META (0.3)
+BuildTools: ocamlbuild
+XOCamlbuildPluginTags: package(eliom.ocamlbuild)
+OCamlVersion: >= 4.01
+
+Library editor
+  Path: src/
+  Modules:
+    Services,
+    Ot,
+    Main
+  BuildDepends:
+    eliom.server (>= 3.0.3),
+    lwt (>= 2.4)
+#  ByteOpt: -w A
+#  NativeOpt: -w A
+
+
+
+Executable editor
+  Install: false
+  Path: src/client
+  MainIs: editor.ml
+  BuildDepends:
+    eliom.client
+  CompiledObject: byte
+#  ByteOpt: -w A
+#  NativeOpt: -w A

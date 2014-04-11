@@ -1,0 +1,9 @@
+* {
+    font-family: sans-serif;
+}
+
+#editor {
+  width: 800px;
+  height: 800px;
+  margin: 15px;
+}
