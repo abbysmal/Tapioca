@@ -94,7 +94,7 @@ let _ = Eliom_client.onload @@ fun () -> onload ()
 
 {server{
 
-let content =
+(* let content =
   Html5.F.(
   Ew_editable.editable_name
     ~a:([a_class ["editable"]])
@@ -103,5 +103,9 @@ let content =
     ~cancel:(span [pcdata "cancel"])
     ~default_name:("editor")
     ~content:(pcdata "content")
-    ~callback:{string -> unit Lwt.t{(fun _ -> Lwt.return_unit)}})
+    ~callback:{string -> unit Lwt.t{(fun _ -> Lwt.return_unit)}}) *)
+let content =
+  Html5.F.(
+    div ~a:[a_contenteditable `True; a_id "editor"]
+    [span [pcdata "lol"]])
 }}

@@ -29,5 +29,5 @@ let () =
          (Eliom_tools.F.html
             ~title:"tapioca"
             ~css:[["css";"tapioca.css"]]
-            Html5.F.(body [
+            Html5.F.(body [Client.content
               ])))
