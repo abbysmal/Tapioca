@@ -19,8 +19,8 @@ let () =
   Eliom_registration.Ocaml.register
     ~service:Services.get_document
     (fun name () -> get_document_function name
-    >>= fun document ->
-    Lwt.return @@ `Result document);
+      >>= fun document ->
+      Lwt.return @@ `Result document);
 
   Tapioca_app.register
     ~service:Services.main_service
@@ -30,5 +30,12 @@ let () =
             ~title:"tapioca"
             ~css:[["css";"tapioca.css"]]
             Html5.F.(body [
-                h2 [];
+                (Ew_editable.editable_name
+                   ~content:(pcdata "lol")
+                   ~callback:{string -> unit Lwt.t{(fun () -> Lwt.return_unit)}}
+                   ~a:[a_class ["lol"]]
+                   ~confirm:span ["lol"]
+                   ~edit:span ["lol"]
+                   ~cancel:span ["lol"]
+                   ~default_name:"ptdr")
               ])))

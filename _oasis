@@ -22,7 +22,8 @@ Library tapioca
     eliom.server (>= 3.0.3),
     lwt (>= 2.4),
     deriving,
-    js_of_ocaml.deriving.syntax
+    js_of_ocaml.deriving.syntax,
+    eliom-widgets.server
 #  ByteOpt: -w A
 #  NativeOpt: -w A
 
