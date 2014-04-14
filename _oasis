@@ -34,7 +34,8 @@ Executable tapioca
   Path: src/client
   MainIs: tapioca.ml
   BuildDepends:
-    eliom.client
+    eliom.client,
+    eliom-widgets.client
   CompiledObject: byte
 #  ByteOpt: -w A
 #  NativeOpt: -w A

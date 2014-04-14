@@ -1,4 +1,8 @@
+{shared{
 let (>>=) = Lwt.bind
+open Eliom_content
+open Html5.D
+}}
 
 let save_data data =
   let store = Ocsipersist.open_store "toto" in
@@ -13,6 +17,7 @@ let save_data data =
   end
 
 let save = server_function Json.t<Edition.operation> save_data
+
 
 {client{
 
@@ -87,3 +92,16 @@ let _ = Eliom_client.onload @@ fun () -> onload ()
 
 }}
 
+{server{
+
+let content =
+  Html5.F.(
+  Ew_editable.editable_name
+    ~a:([a_class ["editable"]])
+    ~edit:(span [pcdata "edit"])
+    ~confirm:(span [pcdata "confirm"])
+    ~cancel:(span [pcdata "cancel"])
+    ~default_name:("editor")
+    ~content:(pcdata "content")
+    ~callback:{string -> unit Lwt.t{(fun _ -> Lwt.return_unit)}})
+}}

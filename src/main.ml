@@ -30,12 +30,4 @@ let () =
             ~title:"tapioca"
             ~css:[["css";"tapioca.css"]]
             Html5.F.(body [
-                (Ew_editable.editable_name
-                   ~content:(pcdata "content")
-                   ~callback:{string -> unit Lwt.t{(fun () -> Lwt.return_unit)}}
-                   ~a:[a_class ["editable"]]
-                   ~confirm:span ["confirm"]
-                   ~edit:span ["edit"]
-                   ~cancel:span ["cancel"]
-                   ~default_name:"editor")
               ])))

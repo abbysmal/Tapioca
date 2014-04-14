@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: e62eb1ec39c71e3150fd5de68670416e)
+# DO NOT EDIT (digest: eb8c81156aa0b66eeedcf0f3e3678dbe)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -26,7 +26,9 @@
 <src/server/*.ml{,i}>: package(js_of_ocaml.deriving.syntax)
 <src/server/*.ml{,i}>: package(lwt)
 # Executable tapioca
+"src/client/tapioca.byte": package(eliom-widgets.client)
 "src/client/tapioca.byte": package(eliom.client)
+<src/client/*.ml{,i}>: package(eliom-widgets.client)
 <src/client/*.ml{,i}>: package(eliom.client)
 # OASIS_STOP
 <src/edition.ml>: syntax(camlp4o)
