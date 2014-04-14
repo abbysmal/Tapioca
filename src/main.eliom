@@ -31,11 +31,11 @@ let () =
             ~css:[["css";"tapioca.css"]]
             Html5.F.(body [
                 (Ew_editable.editable_name
-                   ~content:(pcdata "lol")
+                   ~content:(pcdata "content")
                    ~callback:{string -> unit Lwt.t{(fun () -> Lwt.return_unit)}}
-                   ~a:[a_class ["lol"]]
-                   ~confirm:span ["lol"]
-                   ~edit:span ["lol"]
-                   ~cancel:span ["lol"]
-                   ~default_name:"ptdr")
+                   ~a:[a_class ["editable"]]
+                   ~confirm:span ["confirm"]
+                   ~edit:span ["edit"]
+                   ~cancel:span ["cancel"]
+                   ~default_name:"editor")
               ])))
