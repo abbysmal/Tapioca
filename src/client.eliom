@@ -48,7 +48,7 @@ let load_document editor =
     | `NotConnected -> Lwt.return_unit
   end
 
-let add_backslash _ = %save (Edition.WriteChar("</br></br>"))
+let add_backslash _ = %save (Edition.WriteChar("<br></br>"))
 let add character = %save (Edition.WriteChar(Js.to_string character))
 let delete_one_char _ = %save (Edition.DeleteChar)
 
