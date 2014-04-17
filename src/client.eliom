@@ -1,7 +1,12 @@
 {shared{
 let (>>=) = Lwt.bind
+
 open Eliom_content
 open Html5.D
+
+type diff = (int * string) array
+  deriving(Json)
+
 }}
 
 let save_data data =
@@ -18,6 +23,7 @@ let save_data data =
 
 let save = server_function Json.t<Edition.operation> save_data
 
+let bus = Eliom_bus.create Json.t<diff>
 
 {client{
 
@@ -69,22 +75,10 @@ let onload _ =
   Lwt_js_events.(
     async
       (fun () ->
-         keypresses Dom_html.document
+        inputs Dom_html.document
            (fun ev _ ->
-              let key = (Js.Optdef.get (ev##charCode) (fun() -> 0)) in
-              if key = 0 then
-                begin
-                  match ev##keyCode with
-                  | 13 -> add_backslash (); Lwt.return_unit
-                  | 8 -> delete_one_char (); Lwt.return_unit
-                  | keypressed -> Eliom_lib.debug "%i" keypressed; Lwt.return_unit
-                end
-              else
-                begin
-                  let ch = Js.string_constr##fromCharCode (key) in
-                  add ch;
-                  Lwt.return_unit
-                end
+             print_endline "lol";
+             Lwt.return_unit
            )))
 
 
@@ -94,16 +88,6 @@ let _ = Eliom_client.onload @@ fun () -> onload ()
 
 {server{
 
-(* let content =
-  Html5.F.(
-  Ew_editable.editable_name
-    ~a:([a_class ["editable"]])
-    ~edit:(span [pcdata "edit"])
-    ~confirm:(span [pcdata "confirm"])
-    ~cancel:(span [pcdata "cancel"])
-    ~default_name:("editor")
-    ~content:(pcdata "content")
-    ~callback:{string -> unit Lwt.t{(fun _ -> Lwt.return_unit)}}) *)
 let content =
   Html5.F.(
     div ~a:[a_contenteditable `True; a_id "editor"]
