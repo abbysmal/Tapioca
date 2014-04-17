@@ -54,8 +54,8 @@ run.common: $(STATIC_DIR)
 	cp _build/src/client/tapioca.js $(STATIC_DIR)
 
 run: run.common
-	ocsigenserver -c ocsigenserver.conf -v
 	goji jslink diff_match_patch -o data/libs.js
+	ocsigenserver -c ocsigenserver.conf -v
 
 run.opt: run.common
 	ocsigenserver.opt -c ocsigenserver.opt.conf -v

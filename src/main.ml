@@ -30,5 +30,5 @@ let () =
          (Eliom_tools.F.html
             ~title:"tapioca"
             ~css:[["css";"tapioca.css"]]
-            ~js:[["js";"libs.js"]]
+            ~js:[["libs.js"]]
             (body [Client.content])))
