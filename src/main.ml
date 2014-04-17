@@ -1,5 +1,6 @@
 open Eliom_content
 open Html5.D
+open Html5.F
 
 let (>>=) = Lwt.bind
 
@@ -29,5 +30,5 @@ let () =
          (Eliom_tools.F.html
             ~title:"tapioca"
             ~css:[["css";"tapioca.css"]]
-            Html5.F.(body [Client.content
-              ])))
+            ~js:[["js";"libs.js"]]
+            (body [Client.content])))
