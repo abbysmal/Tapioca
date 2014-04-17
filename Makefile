@@ -55,6 +55,7 @@ run.common: $(STATIC_DIR)
 
 run: run.common
 	ocsigenserver -c ocsigenserver.conf -v
+	goji jslink diff_match_patch -o data/libs.js
 
 run.opt: run.common
 	ocsigenserver.opt -c ocsigenserver.opt.conf -v
