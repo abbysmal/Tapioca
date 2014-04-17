@@ -4,9 +4,8 @@ let (>>=) = Lwt.bind
 open Eliom_content
 open Html5.D
 
-type diff = (int * string) array
+type diff = (int  * string) array
   deriving(Json)
-
 }}
 
 let save_data data =
@@ -23,7 +22,7 @@ let save_data data =
 
 let save = server_function Json.t<Edition.operation> save_data
 
-let bus = Eliom_bus.create Json.t<diff>
+let bus = Eliom_bus.create Json.t<((int * string) array)>
 
 {client{
 
@@ -46,6 +45,7 @@ let load_document editor =
 
 let onload _ =
   let d = Html.document in
+  let oldContent = ref (Js.string "") in
 
   let body =
     Js.Opt.get (d##getElementById (Js.string "editor"))
@@ -63,7 +63,11 @@ let onload _ =
       (fun () ->
         inputs Dom_html.document
            (fun ev _ ->
-             print_endline "lol";
+             let dmp = DiffMatchPatch.make () in
+             let diff = DiffMatchPatch.diff_main dmp (Js.to_string
+             (!oldContent)) (Js.to_string (editor##innerHTML)) in
+             Eliom_bus.write %bus (diff : diff);
+             oldContent := (editor##innerHTML);
              Lwt.return_unit
            )))
 
