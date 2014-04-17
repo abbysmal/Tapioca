@@ -34,16 +34,6 @@ let ( |> ) x f = f x
 
 open Dom
 
-let rec send_data changes =
-  Lwt_js.sleep 1.0
-  >>= fun () ->
-  let send_patch value = ignore @@ %save value in
-  let to_send = !changes in
-  changes := [];
-  List.iter send_patch to_send;
-  send_data changes
-
-
 let load_document editor =
   Eliom_client.call_ocaml_service ~service:%Services.get_document "toto" ()
   >>= fun response ->
@@ -53,10 +43,6 @@ let load_document editor =
     (editor##innerHTML <-(Js.string document))
     | `NotConnected -> Lwt.return_unit
   end
-
-let add_backslash _ = %save (Edition.WriteChar("<br></br>"))
-let add character = %save (Edition.WriteChar(Js.to_string character))
-let delete_one_char _ = %save (Edition.DeleteChar)
 
 let onload _ =
   let d = Html.document in
@@ -91,5 +77,5 @@ let _ = Eliom_client.onload @@ fun () -> onload ()
 let content =
   Html5.F.(
     div ~a:[a_contenteditable `True; a_id "editor"]
-    [span [pcdata "lol"]])
+    [span []])
 }}
