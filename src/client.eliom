@@ -22,7 +22,7 @@ let save_data data =
 
 let save = server_function Json.t<Edition.operation> save_data
 
-let bus = Eliom_bus.create Json.t<((int * string) array)>
+let bus = Eliom_bus.create Json.t<(int * ((int * string) array))>
 
 {client{
 
@@ -44,8 +44,9 @@ let load_document editor =
   end
 
 let onload _ =
+  Random.self_init ();
   let d = Html.document in
-  let oldContent = ref (Js.string "") in
+  let self_id = Random.int 4096 in
 
   let body =
     Js.Opt.get (d##getElementById (Js.string "editor"))
@@ -55,21 +56,36 @@ let onload _ =
   editor##style##border <- Js.string "2px #c5cd5c solid";
   editor##id  <- Js.string "editorFrame";
   Dom.appendChild body editor;
-
   ignore(load_document editor);
+  let oldContent = ref editor##innerHTML in
 
   Lwt_js_events.(
     async
       (fun () ->
         inputs Dom_html.document
            (fun ev _ ->
+             Eliom_lib.debug "lol ptdr xd";
              let dmp = DiffMatchPatch.make () in
-             let diff = DiffMatchPatch.diff_main dmp (Js.to_string
-             (!oldContent)) (Js.to_string (editor##innerHTML)) in
-             Eliom_bus.write %bus (diff : diff);
+             let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent)) (Js.to_string (editor##innerHTML)) in
+             Eliom_bus.write %bus (self_id, diff);
              oldContent := (editor##innerHTML);
              Lwt.return_unit
-           )))
+  )));
+
+  Lwt.async (fun () -> Lwt_stream.iter
+  (fun (id, diff) ->
+    if id != self_id then
+      begin
+        Array.iter (fun (idx, str) -> Printf.printf "idx: %d str %s\n" idx str) diff;
+        let dmp = DiffMatchPatch.make () in
+        let patch = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
+        editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch (Js.to_string editor##innerHTML);
+        oldContent := editor##innerHTML
+      end
+    else
+      ()
+  )
+  (Eliom_bus.stream %bus))
 
 
 let _ = Eliom_client.onload @@ fun () -> onload ()
