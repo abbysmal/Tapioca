@@ -17,7 +17,7 @@ let save_data data =
   begin
     match data with
     | Edition.DeleteChar -> Ocsipersist.set v @@ Str.string_before value (String.length value -1)
-    | Edition.WriteChar str -> Eliom_lib.debug "%s" value; Ocsipersist.set v @@ value ^ str
+    | Edition.WriteChar str -> Ocsipersist.set v @@ value ^ str
   end
 
 let save = server_function Json.t<Edition.operation> save_data
@@ -33,18 +33,18 @@ let ( |> ) x f = f x
 
 open Dom
 
-let load_document editor =
+let load_document editor old =
   Eliom_client.call_ocaml_service ~service:%Services.get_document "toto" ()
   >>= fun response ->
   begin
     match response with
-    | `Result document -> Eliom_lib.debug "lol %s" document;Lwt.return
-    (editor##innerHTML <-(Js.string document))
+    | `Result document -> editor##innerHTML <- (Js.string document); old := editor##innerHTML; Lwt.return_unit
     | `NotConnected -> Lwt.return_unit
   end
 
 let onload _ =
   Random.self_init ();
+  let oldContent = ref (Js.string "") in
   let d = Html.document in
   let self_id = Random.int 4096 in
 
@@ -56,15 +56,13 @@ let onload _ =
   editor##style##border <- Js.string "2px #c5cd5c solid";
   editor##id  <- Js.string "editorFrame";
   Dom.appendChild body editor;
-  ignore(load_document editor);
-  let oldContent = ref editor##innerHTML in
+  ignore(load_document editor oldContent);
 
   Lwt_js_events.(
     async
       (fun () ->
         inputs Dom_html.document
            (fun ev _ ->
-             Eliom_lib.debug "lol ptdr xd";
              let dmp = DiffMatchPatch.make () in
              let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent)) (Js.to_string (editor##innerHTML)) in
              Eliom_bus.write %bus (self_id, diff);
@@ -76,7 +74,6 @@ let onload _ =
   (fun (id, diff) ->
     if id != self_id then
       begin
-        Array.iter (fun (idx, str) -> Printf.printf "idx: %d str %s\n" idx str) diff;
         let dmp = DiffMatchPatch.make () in
         let patch = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
         editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch (Js.to_string editor##innerHTML);
