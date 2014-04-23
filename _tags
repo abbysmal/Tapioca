@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 0e463a95ebf343482a436170f5e82838)
+# DO NOT EDIT (digest: 25af1870d6e04c0bc0141b39f6ec1d81)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -17,22 +17,18 @@
 "src/tapioca.cmxs": use_tapioca
 <src/*.ml{,i}>: package(deriving)
 <src/*.ml{,i}>: package(diff_match_patch)
-<src/*.ml{,i}>: package(eliom-widgets.server)
 <src/*.ml{,i}>: package(eliom.server)
 <src/*.ml{,i}>: package(js_of_ocaml.deriving.syntax)
 <src/*.ml{,i}>: package(lwt)
 <src/server/*.ml{,i}>: package(deriving)
 <src/server/*.ml{,i}>: package(diff_match_patch)
-<src/server/*.ml{,i}>: package(eliom-widgets.server)
 <src/server/*.ml{,i}>: package(eliom.server)
 <src/server/*.ml{,i}>: package(js_of_ocaml.deriving.syntax)
 <src/server/*.ml{,i}>: package(lwt)
 # Executable tapioca
 "src/client/tapioca.byte": package(diff_match_patch)
-"src/client/tapioca.byte": package(eliom-widgets.client)
 "src/client/tapioca.byte": package(eliom.client)
 <src/client/*.ml{,i}>: package(diff_match_patch)
-<src/client/*.ml{,i}>: package(eliom-widgets.client)
 <src/client/*.ml{,i}>: package(eliom.client)
 # OASIS_STOP
 <src/edition.ml>: syntax(camlp4o)

@@ -1,7 +1,3 @@
-open Eliom_content
-open Html5.D
-open Html5.F
-
 let (>>=) = Lwt.bind
 
 module Tapioca_app =
@@ -26,9 +22,4 @@ let () =
   Tapioca_app.register
     ~service:Services.main_service
     (fun () () ->
-       Lwt.return
-         (Eliom_tools.F.html
-            ~title:"tapioca"
-            ~css:[["css";"tapioca.css"]]
-            ~js:[["libs.js"]]
-            (body [Client.content])))
+       Lwt.return @@ Templates.format_page Client.content)

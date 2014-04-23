@@ -17,13 +17,13 @@ Library tapioca
     server/Client,
     Services,
     Edition,
+    Templates,
     Main
   BuildDepends:
     eliom.server (>= 3.0.3),
     lwt (>= 2.4),
     deriving,
     js_of_ocaml.deriving.syntax,
-    eliom-widgets.server,
     diff_match_patch
 #  ByteOpt: -w A
 #  NativeOpt: -w A
@@ -36,7 +36,6 @@ Executable tapioca
   MainIs: tapioca.ml
   BuildDepends:
     eliom.client,
-    eliom-widgets.client,
     diff_match_patch
   CompiledObject: byte
 #  ByteOpt: -w A

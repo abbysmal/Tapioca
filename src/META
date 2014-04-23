@@ -1,10 +1,10 @@
 # OASIS_START
-# DO NOT EDIT (digest: c9730f9ec73df61477462a6957743a43)
+# DO NOT EDIT (digest: 3ffc38a17ce18cb809a7d83081bf063b)
 version = "1.0"
 description =
 "Tapioca: A simple collaborative text editor experiment in OCaml"
 requires =
-"eliom.server lwt deriving js_of_ocaml.deriving.syntax eliom-widgets.server diff_match_patch"
+"eliom.server lwt deriving js_of_ocaml.deriving.syntax diff_match_patch"
 archive(byte) = "tapioca.cma"
 archive(byte, plugin) = "tapioca.cma"
 archive(native) = "tapioca.cmxa"
