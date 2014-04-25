@@ -1,3 +1,3 @@
-type operation = WriteChar of string
-               | DeleteChar
-               deriving (Json)
+type response =
+  | Applied of int
+  | Rejected of (int * string) array list

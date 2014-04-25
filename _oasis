@@ -16,6 +16,7 @@ Library tapioca
   Modules:
     server/Client,
     Services,
+    Patches,
     Edition,
     Templates,
     Main
