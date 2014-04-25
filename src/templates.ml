@@ -8,4 +8,3 @@ let format_page content =
      ~css:[["css";"tapioca.css"];["css";"bootstrap.css"];["css";"bootstrap-theme.css"]]
      ~js:[["libs.js"]]
      (body [content]))
-

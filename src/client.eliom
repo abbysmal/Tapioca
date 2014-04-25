@@ -84,15 +84,17 @@ let onload _ =
   )
   (Eliom_bus.stream %bus))
 
-
 let _ = Eliom_client.onload @@ fun () -> onload ()
 
 }}
 
+
 {server{
 
 let content =
+
   Html5.F.(
     div ~a:[a_contenteditable `True; a_id "editor"]
-    [span []])
+      [span []])
+
 }}

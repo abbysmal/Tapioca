@@ -7,4 +7,3 @@ let get_document =
     ~rt:(Eliom_service.rt : [`Result of string | `NotConnected] Eliom_service.rt)
     ~get_params: (Eliom_parameter.string "document")
     ()
-
