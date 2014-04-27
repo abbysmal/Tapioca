@@ -38,7 +38,8 @@ let load_document editor old =
   >>= fun response ->
   begin
     match response with
-    | `Result document -> editor##innerHTML <- (Js.string document); old := editor##innerHTML; Lwt.return_unit
+    | `Result document -> editor##innerHTML <- (Js.string document);
+      old := editor##innerHTML; Lwt.return_unit
     | `NotConnected -> Lwt.return_unit
   end
 
@@ -64,7 +65,8 @@ let onload _ =
         inputs Dom_html.document
            (fun ev _ ->
              let dmp = DiffMatchPatch.make () in
-             let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent)) (Js.to_string (editor##innerHTML)) in
+             let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent))
+                 (Js.to_string (editor##innerHTML)) in
              Eliom_bus.write %bus (self_id, diff);
              oldContent := (editor##innerHTML);
              Lwt.return_unit
@@ -74,9 +76,12 @@ let onload _ =
   (fun (id, diff) ->
     if id != self_id then
       begin
+        Array.iter (fun (i, s) -> Eliom_lib.debug "op: %d str %s\n" i s) diff;
         let dmp = DiffMatchPatch.make () in
-        let patch = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
-        editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch (Js.to_string editor##innerHTML);
+        let patch = DiffMatchPatch.patch_make dmp
+            (Js.to_string editor##innerHTML) diff in
+        editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch
+            (Js.to_string editor##innerHTML);
         oldContent := editor##innerHTML
       end
     else
