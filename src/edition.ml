@@ -21,11 +21,12 @@ let handle_patch_request request =
     let cid, ctext = cscopy.id, cscopy.text in
     let rid, rdiffs = request.from_revision, request.diffs in
     match Patches.apply_diffs ctext request.diffs with
-    | Patches.Failure _ -> Lwt.return false
-    | Patches.Success ntext -> if rid = cid then Lwt.return true else Lwt.return false
+    | Patches.Failure _ -> Lwt.return (Rejected [])
+    | Patches.Success ntext -> if rid = cid then Lwt.return (Applied (cid + 1))
+      else Lwt.return (Rejected [])
   in
   get_shadowcopies ()
   >>= fun scopies ->
   match scopies with
-  | [] -> Lwt.return false
+  | [] -> Lwt.return (Rejected [])
   | x::xs -> verify_patch x xs
