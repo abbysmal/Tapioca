@@ -16,7 +16,6 @@ let apply_deletion text str i =
   let to_delete = Str.string_before current_chunk (String.length str) in
   if to_delete = str then
     begin
-
       text := (Str.string_before !text i) ^ (Str.string_after !text (i + (String.length str)));
       true
     end
