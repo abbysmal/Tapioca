@@ -14,9 +14,14 @@ let get_document_function name =
 
 let () =
   Eliom_registration.Ocaml.register
+    ~service:Client.send_patch
+    (fun patch () ->
+       Edition.handle_patch_request patch);
+
+  Eliom_registration.Ocaml.register
     ~service:Services.get_document
     (fun name () -> get_document_function name
-           >>= fun document ->
+      >>= fun document ->
       Lwt.return @@ `Result document);
 
   Tapioca_app.register

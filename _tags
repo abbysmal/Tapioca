@@ -32,6 +32,7 @@
 <src/client/*.ml{,i}>: package(eliom.client)
 # OASIS_STOP
 <src/edition.ml>: syntax(camlp4o)
+<src/services.ml>: syntax(camlp4o)
 <src/main.eliom>: syntax(camlp4o)
 <src/**/*.ml{,i}>: thread
 "src/client/tapioca.js": package(eliom.client)

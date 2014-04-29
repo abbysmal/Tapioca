@@ -6,23 +6,21 @@ open Html5.D
 
 type diff = (int  * string) array
   deriving(Json)
+
+type request = {from_revision : int; diffs : (int * string) list}
+    deriving(Json)
 }}
 
-(* let save_data data = *)
-(*   let store = Ocsipersist.open_store "toto" in *)
-(*   Ocsipersist.make_persistent ~store ~name:"toto" ~default:"defautl" *)
-(*   >>= fun v -> *)
-(*   Ocsipersist.get v *)
-(*   >>= fun value -> *)
-(*   begin *)
-(*     match data with *)
-(*     | Edition.DeleteChar -> Ocsipersist.set v @@ Str.string_before value (String.length value -1) *)
-(*     | Edition.WriteChar str -> Ocsipersist.set v @@ value ^ str *)
-(*   end *)
+{server{
 
-(* let save = server_function Json.t<Edition.operation> save_data *)
+let send_patch =
+  Eliom_service.Ocaml.coservice'
+    ~rt:(Eliom_service.rt : [`Applied of int | `Refused] Eliom_service.rt)
+    ~get_params: (Eliom_parameter.ocaml "lol" Json.t<request>)
+    ()
 
-(* let bus = Eliom_bus.create Json.t<(int * ((int * string) array))> *)
+}}
+
 
 {client{
 
@@ -57,20 +55,25 @@ let onload _ =
   editor##style##border <- Js.string "2px #c5cd5c solid";
   editor##id  <- Js.string "editorFrame";
   Dom.appendChild body editor;
-  ignore(load_document editor oldContent)(* ; *)
+  ignore(load_document editor oldContent);
 
-  (* Lwt_js_events.( *)
-  (*   async *)
-  (*     (fun () -> *)
-  (*       inputs Dom_html.document *)
-  (*          (fun ev _ -> *)
-  (*            let dmp = DiffMatchPatch.make () in *)
-  (*            let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent)) *)
-  (*                (Js.to_string (editor##innerHTML)) in *)
-  (*            Eliom_bus.write %bus (self_id, diff); *)
-  (*            oldContent := (editor##innerHTML); *)
-  (*            Lwt.return_unit *)
-  (* ))); *)
+  Lwt_js_events.(
+    async
+      (fun () ->
+        inputs Dom_html.document
+           (fun ev _ ->
+             let dmp = DiffMatchPatch.make () in
+             let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent))
+                 (Js.to_string (editor##innerHTML)) in
+             let req = { from_revision = 0; diffs = (Array.to_list diff); } in
+             Eliom_client.call_ocaml_service ~service:%send_patch req ()
+             >>= fun response ->
+             begin
+               match response with
+               | `Applied _ -> oldContent := (editor##innerHTML); Lwt.return_unit
+               | `Refused -> Lwt.return_unit
+             end
+  )))
 
   (* Lwt.async (fun () -> Lwt_stream.iter *)
   (* (fun (id, diff) -> *)

@@ -4,8 +4,6 @@ type response =
   | Applied of int
   | Rejected of (int * string) array list
 
-type request = {from_revision : int; diffs : (int * string) list}
-
 type revision = {id : int; text : string }
 
 let (append_shadowcopies, get_shadowcopies) =
@@ -16,17 +14,17 @@ let (append_shadowcopies, get_shadowcopies) =
     >>= fun shdwcopies -> Eliom_reference.set eref (elm::shdwcopies)),
   (fun () -> get eref))
 
-let handle_patch_request request =
+let handle_patch_request (request : Client.request) =
   let verify_patch cscopy oscopies =
     let cid, ctext = cscopy.id, cscopy.text in
     let rid, rdiffs = request.from_revision, request.diffs in
     match Patches.apply_diffs ctext request.diffs with
-    | Patches.Failure _ -> Lwt.return (Rejected [])
-    | Patches.Success ntext -> if rid = cid then Lwt.return (Applied (cid + 1))
-      else Lwt.return (Rejected [])
+    | Patches.Failure _ -> Lwt.return (`Refused)
+    | Patches.Success ntext -> if rid = cid then Lwt.return (`Applied (cid + 1))
+      else Lwt.return (`Refused)
   in
   get_shadowcopies ()
   >>= fun scopies ->
   match scopies with
-  | [] -> Lwt.return (Rejected [])
+  | [] -> Lwt.return (`Refused)
   | x::xs -> verify_patch x xs

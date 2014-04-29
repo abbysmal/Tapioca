@@ -15,9 +15,9 @@ Library tapioca
   Path: src/
   Modules:
     server/Client,
-    Services,
-    Patches,
     Edition,
+    Patches,
+    Services,
     Templates,
     Main
   BuildDepends:
