@@ -13,14 +13,19 @@ type request = {from_revision : int; diffs : (int * string) list}
 
 {server{
 
+let content =
+  Html5.F.(
+    div ~a:[a_contenteditable `True; a_id "editor"]
+      [span []])
+
+
 let send_patch =
-  Eliom_service.Ocaml.coservice'
+  Eliom_service.Ocaml.post_coservice'
     ~rt:(Eliom_service.rt : [`Applied of int | `Refused] Eliom_service.rt)
-    ~get_params: (Eliom_parameter.ocaml "lol" Json.t<request>)
+    ~post_params: (Eliom_parameter.ocaml "lol" Json.t<request>)
     ()
 
 }}
-
 
 {client{
 
@@ -44,6 +49,7 @@ let load_document editor old =
 let onload _ =
   Random.self_init ();
   let oldContent = ref (Js.string "") in
+  let rev = ref 0 in
   let d = Html.document in
   let self_id = Random.int 4096 in
 
@@ -65,12 +71,12 @@ let onload _ =
              let dmp = DiffMatchPatch.make () in
              let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent))
                  (Js.to_string (editor##innerHTML)) in
-             let req = { from_revision = 0; diffs = (Array.to_list diff); } in
-             Eliom_client.call_ocaml_service ~service:%send_patch req ()
+             let req = { from_revision = !rev; diffs = (Array.to_list diff); } in
+             Eliom_client.call_ocaml_service ~service:%send_patch () req
              >>= fun response ->
              begin
                match response with
-               | `Applied _ -> oldContent := (editor##innerHTML); Lwt.return_unit
+               | `Applied _ -> rev := !rev + 1; oldContent := (editor##innerHTML); Lwt.return_unit
                | `Refused -> Lwt.return_unit
              end
   )))
@@ -93,16 +99,5 @@ let onload _ =
   (* (Eliom_bus.stream %bus)) *)
 
 let _ = Eliom_client.onload @@ fun () -> onload ()
-
-}}
-
-
-{server{
-
-let content =
-
-  Html5.F.(
-    div ~a:[a_contenteditable `True; a_id "editor"]
-      [span []])
 
 }}
