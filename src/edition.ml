@@ -7,7 +7,7 @@ type response =
 type revision = {id : int; text : string }
 
 let (append_shadowcopies, get_shadowcopies) =
-  let default_value = [{id = 0; text = ""}] in
+  let default_value = [{id = 0; text = "default"}] in
   let eref = Eliom_reference.eref ~scope:Eliom_common.site_scope default_value in
   let get = Eliom_reference.get in
   ((fun elm -> get eref
@@ -19,8 +19,14 @@ let handle_patch_request (request : Client.request) =
     let cid, ctext = cscopy.id, cscopy.text in
     let rid, rdiffs = request.from_revision, request.diffs in
     match Patches.apply_diffs ctext request.diffs with
-    | Patches.Failure _ -> Lwt.return (`Refused)
-    | Patches.Success ntext -> if rid = cid then Lwt.return (`Applied (cid + 1))
+    | Patches.Failure s -> Lwt.return (`Refused)
+    | Patches.Success ntext -> if rid = 0 then
+        begin
+          let ncopy = { id = cid + 1;
+                        text = ntext; } in
+          append_shadowcopies ncopy;
+          Lwt.return (`Applied (cid + 1))
+        end
       else Lwt.return (`Refused)
   in
   get_shadowcopies ()
