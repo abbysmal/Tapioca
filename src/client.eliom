@@ -9,6 +9,10 @@ type diff = (int  * string) array
 
 type request = {from_revision : int; diffs : (int * string) list}
     deriving(Json)
+
+let print_state rev text =
+  Eliom_lib.debug "id: %d\n%s\nEND TEXT\n" rev text
+
 }}
 
 {server{
@@ -76,8 +80,9 @@ let onload _ =
              >>= fun response ->
              begin
                match response with
-               | `Applied _ -> rev := !rev + 1; oldContent := (editor##innerHTML); Lwt.return_unit
-               | `Refused -> Lwt.return_unit
+               | `Applied _ -> rev := !rev + 1; oldContent := (editor##innerHTML);
+                 print_state !rev (Js.to_string editor##innerHTML); Lwt.return_unit
+               | `Refused -> print_endline "echec\n";Lwt.return_unit
              end
   )))
 

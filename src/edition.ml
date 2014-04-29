@@ -15,22 +15,24 @@ let (append_shadowcopies, get_shadowcopies) =
   (fun () -> get eref))
 
 let handle_patch_request (request : Client.request) =
+  Eliom_lib.debug "llol je suis isi\n";
   let verify_patch cscopy oscopies =
     let cid, ctext = cscopy.id, cscopy.text in
+    Client.print_state cid ctext;
     let rid, rdiffs = request.from_revision, request.diffs in
     match Patches.apply_diffs ctext request.diffs with
-    | Patches.Failure s -> Lwt.return (`Refused)
-    | Patches.Success ntext -> if rid = 0 then
+    | Patches.Failure s -> Eliom_lib.debug "%s\n" s; Lwt.return (`Refused)
+    | Patches.Success ntext -> if rid = cid then
         begin
           let ncopy = { id = cid + 1;
                         text = ntext; } in
           append_shadowcopies ncopy;
-          Lwt.return (`Applied (cid + 1))
+          Eliom_lib.debug "success"; Lwt.return (`Applied (cid + 1))
         end
       else Lwt.return (`Refused)
   in
   get_shadowcopies ()
   >>= fun scopies ->
   match scopies with
-  | [] -> Lwt.return (`Refused)
+  | [] ->Eliom_lib.debug "echeeec\n"; Lwt.return (`Refused)
   | x::xs -> verify_patch x xs
