@@ -72,6 +72,7 @@ let onload _ =
       (fun () ->
         inputs Dom_html.document
            (fun ev _ ->
+             Lwt_js.sleep 1. >>= fun () ->
              let dmp = DiffMatchPatch.make () in
              let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent))
                  (Js.to_string (editor##innerHTML)) in

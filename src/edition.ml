@@ -11,11 +11,10 @@ let (append_shadowcopies, get_shadowcopies) =
   let eref = Eliom_reference.eref ~scope:Eliom_common.site_scope default_value in
   let get = Eliom_reference.get in
   ((fun elm -> get eref
-    >>= fun shdwcopies -> Eliom_reference.set eref (elm::shdwcopies)),
+     >>= fun shdwcopies -> Eliom_reference.set eref (elm::shdwcopies)),
   (fun () -> get eref))
 
 let handle_patch_request (request : Client.request) =
-  Eliom_lib.debug "llol je suis isi\n";
   let verify_patch cscopy oscopies =
     let cid, ctext = cscopy.id, cscopy.text in
     Client.print_state cid ctext;
@@ -29,10 +28,10 @@ let handle_patch_request (request : Client.request) =
           append_shadowcopies ncopy;
           Eliom_lib.debug "success"; Lwt.return (`Applied (cid + 1))
         end
-      else Lwt.return (`Refused)
+      else begin Eliom_lib.debug "Id mismatch\n";Lwt.return (`Refused) end
   in
   get_shadowcopies ()
   >>= fun scopies ->
   match scopies with
-  | [] ->Eliom_lib.debug "echeeec\n"; Lwt.return (`Refused)
+  | [] -> Eliom_lib.debug "echeeec\n"; Lwt.return (`Refused)
   | x::xs -> verify_patch x xs
