@@ -22,7 +22,6 @@ let content =
     div ~a:[a_contenteditable `True; a_id "editor"]
       [span []])
 
-
 let send_patch =
   Eliom_service.Ocaml.post_coservice'
     ~rt:(Eliom_service.rt : [`Applied of int | `Refused] Eliom_service.rt)
@@ -50,10 +49,10 @@ let load_document editor old =
     | `NotConnected -> Lwt.return_unit
   end
 
-let make_diff text old_text =
+let make_diff text old_text rev =
   let dmp = DiffMatchPatch.make () in
   let diff = DiffMatchPatch.diff_main dmp old_text text in
-  {from_revision = !rev; diffs = (Array.to_list diff);}
+  {from_revision = rev; diffs = (Array.to_list diff);}
 
 let onload _ =
   Random.self_init ();
@@ -76,7 +75,7 @@ let onload _ =
   editor##id  <- Js.string "editorFrame";
   Dom.appendChild body editor;
   (* get document content *)
-  ignore(load_document editor oldContent);
+  ignore(load_document editor shadow_copy);
 
   (* changes handler *)
   Lwt_js_events.(
@@ -85,14 +84,14 @@ let onload _ =
         inputs Dom_html.document
            (fun ev _ ->
              Lwt_js.sleep 1. >>= fun () ->
- in
-             Eliom_client.call_ocaml_service ~service:%send_patch () req
+             let diff = make_diff (Js.to_string editor##innerHTML)
+                 (Js.to_string !shadow_copy) !rev in
+             Eliom_client.call_ocaml_service ~service:%send_patch () diff
              >>= fun response ->
              begin
                match response with
-               | `Applied _ -> rev := !rev + 1; oldContent := (editor##innerHTML);
-                 print_state !rev (Js.to_string editor##innerHTML); Lwt.return_unit
-               | `Refused -> print_endline "echec\n";Lwt.return_unit
+               | `Applied srev, scopy -> Lwt.return @@ rev := srev; shadow_copy := scopy
+               | `Refused -> Lwt.return ()
              end
   )))
 
