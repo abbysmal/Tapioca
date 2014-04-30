@@ -5,7 +5,7 @@ open Eliom_content
 open Html5.D
 
 type diff = (int  * string) array
-  deriving(Json)
+    deriving(Json)
 
 type request = {from_revision : int; diffs : (int * string) list}
     deriving(Json)
@@ -50,6 +50,11 @@ let load_document editor old =
     | `NotConnected -> Lwt.return_unit
   end
 
+let make_diff text old_text =
+  let dmp = DiffMatchPatch.make () in
+  let diff = DiffMatchPatch.diff_main dmp old_text text in
+  {from_revision = !rev; diffs = (Array.to_list diff);}
+
 let onload _ =
   Random.self_init ();
 
@@ -70,18 +75,17 @@ let onload _ =
   editor##style##border <- Js.string "2px #c5cd5c solid";
   editor##id  <- Js.string "editorFrame";
   Dom.appendChild body editor;
+  (* get document content *)
   ignore(load_document editor oldContent);
 
+  (* changes handler *)
   Lwt_js_events.(
     async
       (fun () ->
         inputs Dom_html.document
            (fun ev _ ->
              Lwt_js.sleep 1. >>= fun () ->
-             let dmp = DiffMatchPatch.make () in
-             let diff = DiffMatchPatch.diff_main dmp (Js.to_string (!oldContent))
-                 (Js.to_string (editor##innerHTML)) in
-             let req = { from_revision = !rev; diffs = (Array.to_list diff); } in
+ in
              Eliom_client.call_ocaml_service ~service:%send_patch () req
              >>= fun response ->
              begin
