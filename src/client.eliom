@@ -52,10 +52,15 @@ let load_document editor old =
 
 let onload _ =
   Random.self_init ();
-  let oldContent = ref (Js.string "") in
+
+  (* Is the current revision server-side *)
+  let shadow_copy = ref (Js.string "") in
+  (* Is the revision number of this client *)
   let rev = ref 0 in
+  (* this client id *)
+  let client_id = Random.int 4096 in
+
   let d = Html.document in
-  let self_id = Random.int 4096 in
 
   let body =
     Js.Opt.get (d##getElementById (Js.string "editor"))
