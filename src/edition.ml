@@ -20,18 +20,18 @@ let handle_patch_request (request : Client.request) =
     Client.print_state cid ctext;
     let rid, rdiffs = request.from_revision, request.diffs in
     match Patches.apply_diffs ctext request.diffs with
-    | Patches.Failure s -> Eliom_lib.debug "%s\n" s; Lwt.return (`Refused)
+    | Patches.Failure s -> print_endline s;Lwt.return (`Refused (cid, ctext))
     | Patches.Success ntext -> if rid = cid then
         begin
           let ncopy = { id = cid + 1;
                         text = ntext; } in
           append_shadowcopies ncopy;
-          Eliom_lib.debug "success"; Lwt.return (`Applied (cid + 1))
+          Lwt.return (`Applied (cid + 1, ntext))
         end
-      else begin Eliom_lib.debug "Id mismatch\n";Lwt.return (`Refused) end
+      else begin print_endline "cid != rid";Lwt.return (`Refused (cid, ctext)) end
   in
   get_shadowcopies ()
   >>= fun scopies ->
   match scopies with
-  | [] -> Eliom_lib.debug "echeeec\n"; Lwt.return (`Refused)
+  | [] -> Lwt.return (`Refused (0, ""))
   | x::xs -> verify_patch x xs

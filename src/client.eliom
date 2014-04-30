@@ -24,7 +24,7 @@ let content =
 
 let send_patch =
   Eliom_service.Ocaml.post_coservice'
-    ~rt:(Eliom_service.rt : [`Applied of int | `Refused] Eliom_service.rt)
+    ~rt:(Eliom_service.rt : [`Applied of int * string | `Refused of int * string] Eliom_service.rt)
     ~post_params: (Eliom_parameter.ocaml "lol" Json.t<request>)
     ()
 
@@ -39,13 +39,13 @@ let ( |> ) x f = f x
 
 open Dom
 
-let load_document editor old =
+let load_document editor old rev =
   Eliom_client.call_ocaml_service ~service:%Services.get_document "toto" ()
   >>= fun response ->
   begin
     match response with
-    | `Result document -> editor##innerHTML <- (Js.string document);
-      old := editor##innerHTML; Lwt.return_unit
+    | `Result (document, id) -> editor##innerHTML <- (Js.string document);
+      old := editor##innerHTML; rev := id; Lwt.return_unit
     | `NotConnected -> Lwt.return_unit
   end
 
@@ -75,7 +75,7 @@ let onload _ =
   editor##id  <- Js.string "editorFrame";
   Dom.appendChild body editor;
   (* get document content *)
-  ignore(load_document editor shadow_copy);
+  ignore(load_document editor shadow_copy rev);
 
   (* changes handler *)
   Lwt_js_events.(
@@ -84,14 +84,16 @@ let onload _ =
         inputs Dom_html.document
            (fun ev _ ->
              Lwt_js.sleep 1. >>= fun () ->
+             Eliom_lib.debug "%s\n" (Js.to_string !shadow_copy);
              let diff = make_diff (Js.to_string editor##innerHTML)
                  (Js.to_string !shadow_copy) !rev in
              Eliom_client.call_ocaml_service ~service:%send_patch () diff
              >>= fun response ->
              begin
                match response with
-               | `Applied srev, scopy -> Lwt.return @@ rev := srev; shadow_copy := scopy
-               | `Refused -> Lwt.return ()
+               | `Applied (srev, scopy) -> rev := srev;
+                 shadow_copy := (Js.string scopy); Lwt.return_unit
+               | `Refused (srev, scopy) -> Eliom_lib.debug "%s\n%s\nSEND" scopy (Js.to_string !shadow_copy); shadow_copy := (Js.string scopy); Lwt.return ()
              end
   )))
 

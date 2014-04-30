@@ -33,11 +33,15 @@ let apply_addition text str i =
   | Failure _ -> false
 
 let check_coherence i s text =
+  Printf.printf "i = %d\ns = '%s'\ntext = '%s'\n" i s text;
+  Printf.printf "Length(s) = %d\nLength(text) = %d\nI = %d\n" (String.length s) (String.length text) i;
   try
-    let chunk = Str.string_before text (i + (String.length s)) in
+    let start = Str.string_before text (i + (String.length s)) in
+    let chunk = Str.string_after start i in
+    Printf.printf "c'%s' != s'%s'\n" chunk s;
     chunk = s
   with
-  | Invalid_argument _ -> false
+  | Invalid_argument _ -> print_endline "false";false
 
 let apply_diffs text diffs =
   let rtext = ref text in
@@ -51,7 +55,7 @@ let apply_diffs text diffs =
         begin
           Failure "Impossible to delete chunk"
         end
-    | (0, str)::xs -> if check_coherence i str text then inner xs (i + (String.length str))
+    | (0, str)::xs -> if check_coherence i str !rtext then inner xs (i + (String.length str))
       else Failure "Retain don't match :'"
     | (1, str)::xs ->
       if apply_addition rtext str i then
