@@ -100,14 +100,17 @@ let onload _ =
   )));
 
   Lwt.async (fun () -> Lwt_stream.iter
-  (fun (id, diff, rev) ->
+  (fun (id, diff, prev) ->
+    print_endline "patch de moi";
     if id != client_id then
       begin
+        print_endline "patch reçu";
         let dmp = DiffMatchPatch.make () in
         let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
         let patch_editor = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
         editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch_editor (Js.to_string editor##innerHTML);
         shadow_copy := Js.string @@ DiffMatchPatch.patch_apply dmp patch_scopy (Js.to_string !shadow_copy);
+        rev := prev;
       end
     else
       ()
