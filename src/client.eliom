@@ -89,7 +89,6 @@ let onload _ =
            (fun ev _ ->
              Lwt_js.sleep 0.3 >>= fun () ->
              let editor = get_editor () in
-             print_endline "je send un truc";
              let diff = make_diff (Js.to_string editor##innerHTML)
                  (Js.to_string !shadow_copy) !rev client_id in
              Eliom_client.call_ocaml_service ~service:%send_patch () diff
@@ -106,7 +105,6 @@ let onload _ =
   (fun (id, diff, prev) ->
     if id != client_id then
       begin
-        print_endline "patch reçu";
         let editor = get_editor () in
         let dmp = DiffMatchPatch.make () in
         let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
