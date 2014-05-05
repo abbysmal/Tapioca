@@ -7,4 +7,7 @@ let format_page content =
      ~title:"Tapioca: An experimental collaborative editor written with Ocsigen"
      ~css:[["css";"tapioca.css"];["css";"bootstrap.css"];["css";"bootstrap-theme.css"]]
      ~js:[["libs.js"]]
-     (body [content]))
+     (body [
+         div [h1 [pcdata "Editeur collaboratif"]];
+         content
+       ]))

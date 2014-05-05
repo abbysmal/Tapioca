@@ -1,4 +1,5 @@
 {shared{
+
 let (>>=) = Lwt.bind
 
 open Eliom_content
@@ -57,6 +58,8 @@ let make_diff text old_text rev client_id =
   let diff = DiffMatchPatch.diff_main dmp old_text text in
   {from_revision = rev; diffs = (Array.to_list diff); client = client_id;}
 
+let get_editor _ = Js.Opt.get (Html.document##getElementById (Js.string "editor")) (fun () -> assert false)
+
 let onload _ =
   Random.self_init ();
 
@@ -74,8 +77,6 @@ let onload _ =
       (fun () -> assert false) in
   let editor = Html.createDiv d in
 
-  editor##style##border <- Js.string "2px #c5cd5c solid";
-  editor##id  <- Js.string "editorFrame";
   Dom.appendChild body editor;
   (* get document content *)
   ignore(load_document editor shadow_copy rev);
@@ -87,6 +88,8 @@ let onload _ =
         inputs Dom_html.document
            (fun ev _ ->
              Lwt_js.sleep 0.3 >>= fun () ->
+             let editor = get_editor () in
+             print_endline "je send un truc";
              let diff = make_diff (Js.to_string editor##innerHTML)
                  (Js.to_string !shadow_copy) !rev client_id in
              Eliom_client.call_ocaml_service ~service:%send_patch () diff
@@ -101,10 +104,10 @@ let onload _ =
 
   Lwt.async (fun () -> Lwt_stream.iter
   (fun (id, diff, prev) ->
-    print_endline "patch de moi";
     if id != client_id then
       begin
         print_endline "patch reçu";
+        let editor = get_editor () in
         let dmp = DiffMatchPatch.make () in
         let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
         let patch_editor = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
@@ -113,7 +116,7 @@ let onload _ =
         rev := prev;
       end
     else
-      ()
+      print_endline "patch de moi";
   )
   (Eliom_bus.stream %patches_bus))
 
