@@ -14,6 +14,10 @@ type request = {client : int; from_revision : int; diffs : (int * string) list}
 let print_state rev text =
   Eliom_lib.debug "id: %d\n%s\nEND TEXT\n" rev text
 
+type bus_message =
+  | Patch of (int * diff * int)
+  | Hello
+
 }}
 
 {server{
@@ -79,12 +83,11 @@ let onload _ =
 
   Dom.appendChild body editor;
   (* get document content *)
-  ignore(load_document editor shadow_copy rev);
 
   (* changes handler *)
   Lwt_js_events.(
     async
-      (fun () ->
+    (fun () ->
         inputs Dom_html.document
            (fun ev _ ->
              Lwt_js.sleep 0.3 >>= fun () ->
@@ -100,6 +103,7 @@ let onload _ =
                | `Refused (srev, scopy) -> shadow_copy := (Js.string scopy); Lwt.return ()
              end
   )));
+  ignore(load_document editor shadow_copy rev);
 
   Lwt.async (fun () -> Lwt_stream.iter
   (fun (id, diff, prev) ->
