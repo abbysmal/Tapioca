@@ -24,7 +24,7 @@ type bus_message =
 
 let content =
   Html5.F.(
-    div ~a:[a_contenteditable `True; a_id "editor"]
+    div ~a:[a_contenteditable true; a_id "editor"]
       [span []])
 
 let send_patch =
