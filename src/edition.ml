@@ -26,7 +26,7 @@ let handle_patch_request (request : Client.request) =
           let ncopy = { id = cid + 1;
                         text = ntext; } in
           append_shadowcopies ncopy;
-          Eliom_bus.write Client.patches_bus (ruid, (Array.of_list rdiffs), (cid + 1));
+          Eliom_bus.write Client.patches_bus (Client.Patch (ruid, (Array.of_list rdiffs), (cid + 1)));
           Lwt.return (`Applied (cid + 1, ntext))
         end
       else begin print_endline "cid != rid";Lwt.return (`Refused (cid, ctext)) end

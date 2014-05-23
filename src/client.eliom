@@ -98,11 +98,11 @@ let onload _ =
       if id = client_id then
         begin
           match !phase with
-          | Init msg_buffer -> load_document bla bla >>= empty_buffer msg_buffer; phase := Ok of []
+          | Init msg_buffer -> begin load_document editor shadow_copy rev; phase := Ok [] end
           | _ -> ()
         end
       else ()
-    | Patch (id, diff, prev) when prev = (!r + 1) ->
+    | Patch (id, diff, prev) when prev = (!rev + 1) ->
       begin
         if id != client_id then
           begin
@@ -120,8 +120,7 @@ let onload _ =
     | _ -> ()
   )
   (Eliom_bus.stream %patches_bus));
-
-
+  Eliom_bus.write %patches_bus (Hello (client_id));
 
   (* changes handler *)
   Lwt_js_events.(
@@ -141,27 +140,7 @@ let onload _ =
                  shadow_copy := (Js.string scopy); Lwt.return_unit
                | `Refused (srev, scopy) -> shadow_copy := (Js.string scopy); Lwt.return ()
              end
-          )));
-
- ignore (load_document editor shadow_copy rev;
-  >>= fun () ->
-  Lwt.return @@
-   Lwt.async (fun () -> Lwt_stream.iter
-  (fun (id, diff, prev) ->
-    if id != client_id then
-      begin
-        let editor = get_editor () in
-        let dmp = DiffMatchPatch.make () in
-        let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
-        let patch_editor = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
-        editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch_editor (Js.to_string editor##innerHTML);
-        shadow_copy := Js.string @@ DiffMatchPatch.patch_apply dmp patch_scopy (Js.to_string !shadow_copy);
-        rev := prev;
-      end
-    else
-      print_endline "patch de moi";
-  )
-  (Eliom_bus.stream %patches_bus))
+          )))
 
 let _ = Eliom_client.onload @@ fun () -> onload ()
 
