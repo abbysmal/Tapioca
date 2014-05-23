@@ -95,13 +95,13 @@ let onload _ =
   Lwt.async (fun _ -> Lwt_stream.iter
   (function
     | Hello id ->
-        if id = client_id then
-          begin
-            match !phase with
-            | Init msg_buffer -> load_document bla bla >>= empty_buffer msg_buffer; phase := Ok of []
-            | _ -> ()
-          end
-        else ()
+      if id = client_id then
+        begin
+          match !phase with
+          | Init msg_buffer -> load_document bla bla >>= empty_buffer msg_buffer; phase := Ok of []
+          | _ -> ()
+        end
+      else ()
     | Patch (id, diff, prev) when prev = (!r + 1) ->
       begin
         if id != client_id then
