@@ -16,7 +16,8 @@ let print_state rev text =
 
 type bus_message =
   | Patch of (int * diff * int)
-  | Hello
+  | Hello of int
+        deriving(Json)
 
 }}
 
@@ -34,13 +35,18 @@ let send_patch =
     ()
 
 let patches_bus = Eliom_bus.create
-    ~scope:Eliom_common.site_scope Json.t<int * diff * int>
+    ~scope:Eliom_common.site_scope Json.t<bus_message>
 
 }}
 
 {client{
 
 module Html = Dom_html
+
+type phase =
+  | Init of bus_message list
+  | Ok of bus_message list
+  | Disconnected
 
 let (>>=) = Lwt.bind
 let ( |> ) x f = f x
@@ -74,6 +80,7 @@ let onload _ =
   (* this client id *)
   let client_id = Random.int 4096 in
 
+  let phase = ref (Init []) in
   let d = Html.document in
 
   let body =
@@ -84,12 +91,44 @@ let onload _ =
   Dom.appendChild body editor;
   (* get document content *)
 
+
+  Lwt.async (fun _ -> Lwt_stream.iter
+  (function
+    | Hello id ->
+        if id = client_id then
+          begin
+            match !phase with
+            | Init msg_buffer -> load_document bla bla >>= empty_buffer msg_buffer; phase := Ok of []
+            | _ -> ()
+          end
+        else ()
+    | Patch (id, diff, prev) when prev = (!r + 1) ->
+      begin
+        if id != client_id then
+          begin
+            let editor = get_editor () in
+            let dmp = DiffMatchPatch.make () in
+            let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
+            let patch_editor = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
+            editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch_editor (Js.to_string editor##innerHTML);
+            shadow_copy := Js.string @@ DiffMatchPatch.patch_apply dmp patch_scopy (Js.to_string !shadow_copy);
+            rev := prev
+          end
+        else
+          ()
+      end
+    | _ -> ()
+  )
+  (Eliom_bus.stream %patches_bus));
+
+
+
   (* changes handler *)
   Lwt_js_events.(
     async
     (fun () ->
         inputs Dom_html.document
-           (fun ev _ ->
+          (fun ev _ ->
              Lwt_js.sleep 0.3 >>= fun () ->
              let editor = get_editor () in
              let diff = make_diff (Js.to_string editor##innerHTML)
@@ -102,10 +141,12 @@ let onload _ =
                  shadow_copy := (Js.string scopy); Lwt.return_unit
                | `Refused (srev, scopy) -> shadow_copy := (Js.string scopy); Lwt.return ()
              end
-  )));
-  ignore(load_document editor shadow_copy rev);
+          )));
 
-  Lwt.async (fun () -> Lwt_stream.iter
+ ignore (load_document editor shadow_copy rev;
+  >>= fun () ->
+  Lwt.return @@
+   Lwt.async (fun () -> Lwt_stream.iter
   (fun (id, diff, prev) ->
     if id != client_id then
       begin
