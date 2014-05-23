@@ -1,4 +1,5 @@
 let (>>=) = Lwt.bind
+include Client
 
 type response =
   | Applied of int
@@ -25,8 +26,8 @@ let handle_patch_request (request : Client.request) =
         begin
           let ncopy = { id = cid + 1;
                         text = ntext; } in
-          append_shadowcopies ncopy;
-          Eliom_bus.write Client.patches_bus (Client.Patch (ruid, (Array.of_list rdiffs), (cid + 1)));
+          ignore(append_shadowcopies ncopy);
+          ignore(Eliom_bus.write Client.patches_bus (Client.Patch (ruid, (Array.of_list rdiffs), (cid + 1))));
           Lwt.return (`Applied (cid + 1, ntext))
         end
       else begin print_endline "cid != rid";Lwt.return (`Refused (cid, ctext)) end

@@ -81,6 +81,9 @@ let onload _ =
   let client_id = Random.int 4096 in
 
   let phase = ref (Init []) in
+  let is_ok _ = match !phase with
+    | Ok _ -> true
+    | _ -> false in
   let d = Html.document in
 
   let body =
@@ -104,8 +107,9 @@ let onload _ =
       else ()
     | Patch (id, diff, prev) when prev = (!rev + 1) ->
       begin
-        if id != client_id then
+        if id != client_id && is_ok () then
           begin
+            Eliom_lib.debug "%s\n" (Js.to_string (editor##innerHTML));
             let editor = get_editor () in
             let dmp = DiffMatchPatch.make () in
             let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in

@@ -1,5 +1,5 @@
 let (>>=) = Lwt.bind
-
+include Edition
 module Tapioca_app =
   Eliom_registration.App (
   struct
