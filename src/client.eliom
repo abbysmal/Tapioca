@@ -58,8 +58,10 @@ let load_document editor old rev =
   >>= fun response ->
   begin
     match response with
-    | `Result (document, id) -> editor##innerHTML <- (Js.string document);
-      old := editor##innerHTML; rev := id; Lwt.return_unit
+    | `Result (document, id) ->
+      editor##innerHTML <- (Js.string document);
+      old := (Js.string document);
+      rev := id; Lwt.return_unit
     | `NotConnected -> Lwt.return_unit
   end
 
@@ -109,9 +111,9 @@ let onload _ =
       begin
         if id != client_id && is_ok () then
           begin
-            Eliom_lib.debug "%s\n" (Js.to_string (editor##innerHTML));
             let editor = get_editor () in
             let dmp = DiffMatchPatch.make () in
+            let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
             let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
             let patch_editor = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
             editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch_editor (Js.to_string editor##innerHTML);
@@ -142,7 +144,7 @@ let onload _ =
                match response with
                | `Applied (srev, scopy) -> rev := srev;
                  shadow_copy := (Js.string scopy); Lwt.return_unit
-               | `Refused (srev, scopy) -> shadow_copy := (Js.string scopy); Lwt.return ()
+               | `Refused (srev, scopy) ->(* shadow_copy := (Js.string scopy); *) Lwt.return ()
              end
           )))
 
