@@ -11,14 +11,10 @@ type diff = (int  * string) array
 type request = {client : int; from_revision : int; diffs : (int * string) list}
     deriving(Json)
 
-let print_state rev text =
-  Eliom_lib.debug "id: %d\n%s\nEND TEXT\n" rev text
-
 type bus_message =
   | Patch of (int * diff * int)
   | Hello of int
         deriving(Json)
-
 }}
 
 {server{
@@ -30,7 +26,9 @@ let content =
 
 let send_patch =
   Eliom_service.Ocaml.post_coservice'
-    ~rt:(Eliom_service.rt : [`Applied of int * string | `Refused of int * string] Eliom_service.rt)
+    ~rt:(Eliom_service.rt :
+           [`Applied of int * string | `Refused of int * string]
+             Eliom_service.rt)
     ~post_params: (Eliom_parameter.ocaml "lol" Json.t<request>)
     ()
 
@@ -49,7 +47,6 @@ type phase =
   | Disconnected
 
 let (>>=) = Lwt.bind
-let ( |> ) x f = f x
 
 open Dom
 
@@ -70,7 +67,9 @@ let make_diff text old_text rev client_id =
   let diff = DiffMatchPatch.diff_main dmp old_text text in
   {from_revision = rev; diffs = (Array.to_list diff); client = client_id;}
 
-let get_editor _ = Js.Opt.get (Html.document##getElementById (Js.string "editor")) (fun () -> assert false)
+let get_editor _ = Js.Opt.get (Html.document##getElementById
+                                 (Js.string "editor")) (fun () -> assert false)
+
 
 let onload _ =
   Random.self_init ();
@@ -99,26 +98,39 @@ let onload _ =
 
   Lwt.async (fun _ -> Lwt_stream.iter
   (function
-    | Hello id ->
+    | Hello id -> (* First, check if the bus is running
+                     by checking our own Hello message *)
       if id = client_id then
         begin
-          match !phase with
-          | Init msg_buffer -> begin load_document editor shadow_copy rev; phase := Ok [] end
+          match !phase with (* if its ours, then, go into the Ok phase
+                               and start loading the document *)
+          | Init msg_buffer -> begin
+              load_document editor shadow_copy rev
+              phase := Ok [] end
           | _ -> ()
         end
       else ()
-    | Patch (id, diff, prev) when prev = (!rev + 1) ->
+    | Patch (id, diff, prev) as patch when prev = (!rev + 1) ->
       begin
         if id != client_id && is_ok () then
           begin
             let editor = get_editor () in
             let dmp = DiffMatchPatch.make () in
-            let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
-            let patch_scopy = DiffMatchPatch.patch_make dmp (Js.to_string !shadow_copy) diff in
-            let patch_editor = DiffMatchPatch.patch_make dmp (Js.to_string editor##innerHTML) diff in
-            editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply dmp patch_editor (Js.to_string editor##innerHTML);
-            shadow_copy := Js.string @@ DiffMatchPatch.patch_apply dmp patch_scopy (Js.to_string !shadow_copy);
+            let patch_scopy = DiffMatchPatch.patch_make dmp
+                (Js.to_string !shadow_copy) diff in
+            let patch_editor = DiffMatchPatch.patch_make dmp
+                (Js.to_string editor##innerHTML) diff in
+            editor##innerHTML <- Js.string @@ DiffMatchPatch.patch_apply
+                dmp patch_editor (Js.to_string editor##innerHTML);
+            shadow_copy := Js.string @@ DiffMatchPatch.patch_apply
+                dmp patch_scopy (Js.to_string !shadow_copy);
             rev := prev
+          end
+        else if id != client_id then
+          begin
+            match !phase with
+            | Init l -> phase := Init (patch::l)
+            | _ -> ()
           end
         else
           ()
@@ -144,7 +156,7 @@ let onload _ =
                match response with
                | `Applied (srev, scopy) -> rev := srev;
                  shadow_copy := (Js.string scopy); Lwt.return_unit
-               | `Refused (srev, scopy) ->(* shadow_copy := (Js.string scopy); *) Lwt.return ()
+               | `Refused (srev, scopy) -> Lwt.return ()
              end
           )))
 
