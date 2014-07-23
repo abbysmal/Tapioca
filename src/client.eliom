@@ -1,20 +1,14 @@
 {shared{
 
-let (>>=) = Lwt.bind
-
 open Eliom_content
 open Html5.D
+open Eliom_lib.Lwt_ops
 
-type diff = (int  * string) array
-    deriving(Json)
 
-type request = {client : int; from_revision : int; diffs : (int * string) list}
-    deriving(Json)
 
-type bus_message =
-  | Patch of (int * diff * int)
-  | Hello of int
-        deriving(Json)
+type t =
+  (Html5_types.div Eliom_content.Html5.elt * (Patches.bus_message, Patches.bus_message) Eliom_bus.t)
+
 }}
 
 {server{
@@ -29,11 +23,11 @@ let send_patch =
     ~rt:(Eliom_service.rt :
            [`Applied of int * string | `Refused of int * string]
              Eliom_service.rt)
-    ~post_params: (Eliom_parameter.ocaml "lol" Json.t<request>)
+    ~post_params: (Eliom_parameter.ocaml "lol" Json.t<Patches.request>)
     ()
 
 let patches_bus = Eliom_bus.create
-    ~scope:Eliom_common.site_scope Json.t<bus_message>
+    ~scope:Eliom_common.site_scope Json.t<Patches.bus_message>
 
 }}
 
@@ -240,4 +234,41 @@ let onload patches_bus editor_elt () =
                | `Refused (srev, scopy) -> Lwt.return ()
              end
           )))
+}}
+{server{
+
+let create _ =
+  let patches_bus = Eliom_bus.create
+      ~scope:Eliom_common.site_scope Json.t<Patches.bus_message>
+  in
+  let elt = Eliom_content.Html5.D.div ~a:
+      [a_contenteditable true] [] in
+  (elt, patches_bus)
+
+let init_and_register ((elt, bus): t) eref =
+  let append_shadowcopy, get_shadowcopy =
+    ((fun elm -> Eliom_reference.set eref elm),
+     (fun () -> Eliom_reference.get eref)) in
+
+  let handler = Patches.handle_patch_request get_shadowcopy append_shadowcopy bus in
+  Eliom_registration.Ocaml.register
+    ~service:send_patch
+    (fun () patch ->
+       handler patch);
+
+  let get_document name = get_shadowcopy ()
+    >>= fun {id = id; text = scopy} ->
+    Lwt.return (`Result (scopy, id)) in
+
+  Eliom_registration.Ocaml.register
+    ~service:Services.get_document
+    (fun () () ->
+  get_document ());
+  ignore {unit Lwt.t{
+      Lwt_js.sleep 0.3 >>= (fun () -> Lwt.return (onload %bus %elt ()))
+  }};
+  Lwt.return_unit
+
+let get_elt (elt, _) = elt
+
 }}

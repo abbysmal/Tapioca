@@ -15,7 +15,7 @@ let (append_shadowcopies, get_shadowcopies) =
      >>= fun shdwcopies -> Eliom_reference.set eref (elm::shdwcopies)),
   (fun () -> get eref))
 
-let handle_patch_request (request : Client.request) =
+let handle_patch_request (request : Patches.request) =
   let verify_patch cscopy oscopies =
     let cid, ctext = cscopy.id, cscopy.text in
     let rid, rdiffs, ruid = request.from_revision, request.diffs, request.client in
