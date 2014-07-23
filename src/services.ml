@@ -4,5 +4,5 @@ let main_service =
 let get_document =
   Eliom_service.Ocaml.coservice'
     ~rt:(Eliom_service.rt : [`Result of (string * int) | `NotConnected] Eliom_service.rt)
-    ~get_params: (Eliom_parameter.string "document")
+    ~get_params: (Eliom_parameter.unit)
     ()
