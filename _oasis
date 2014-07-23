@@ -25,7 +25,7 @@ Library tapioca
     lwt (>= 2.4),
     deriving,
     deriving.syntax,
-    js_of_ocaml.deriving,
+    js_of_ocaml.deriving.syntax,
     diff_match_patch
 #  ByteOpt: -w A
 #  NativeOpt: -w A
@@ -39,6 +39,7 @@ Executable tapioca
   BuildDepends:
     eliom.client,
     deriving,
+    deriving.syntax,
     js_of_ocaml.deriving,
     diff_match_patch
   CompiledObject: byte
